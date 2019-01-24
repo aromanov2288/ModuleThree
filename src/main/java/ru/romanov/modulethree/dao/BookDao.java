@@ -1,20 +1,21 @@
 package ru.romanov.modulethree.dao;
 
+import ru.romanov.modulethree.domain.Author;
 import ru.romanov.modulethree.domain.Book;
+import ru.romanov.modulethree.domain.Genre;
 
 import java.util.List;
+import java.util.Set;
 
 public interface BookDao {
 
-    int getCount();
-
-    void insert(String bookName, int authorId, int genreId);
+    int insert(Book book);
 
     Book getById(int id);
 
     List<Book> getAll();
 
-    void update(Book Book);
+    void update(int id, String name, Genre genre, Set<Author> authorsSet);
 
-    void deleteByIb(int id);
+    void deleteById(int id);
 }

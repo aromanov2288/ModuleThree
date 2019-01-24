@@ -6,15 +6,13 @@ import java.util.List;
 
 public interface AuthorDao {
 
-    int getCount();
-
-    void insert(String name);
+    int insert(Author author);
 
     Author getById(int id);
 
     List<Author> getAll();
 
-    void update(Author author);
+    void update(int id, String fio);
 
-    void deleteByIb(int id);
+    void deleteById(int id);
 }
