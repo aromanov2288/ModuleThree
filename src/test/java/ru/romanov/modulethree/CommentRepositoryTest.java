@@ -4,16 +4,11 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
-import ru.romanov.modulethree.dao.AuthorDao;
-import ru.romanov.modulethree.dao.AuthorDaoJpa;
-import ru.romanov.modulethree.dao.BookDao;
-import ru.romanov.modulethree.dao.BookDaoJpa;
-import ru.romanov.modulethree.dao.CommentDao;
-import ru.romanov.modulethree.dao.CommentDaoJpa;
-import ru.romanov.modulethree.dao.GenreDao;
-import ru.romanov.modulethree.dao.GenreDaoJpa;
+import ru.romanov.modulethree.dao.AuthorRepository;
+import ru.romanov.modulethree.dao.BookRepository;
+import ru.romanov.modulethree.dao.CommentRepository;
+import ru.romanov.modulethree.dao.GenreRepository;
 import ru.romanov.modulethree.domain.Author;
 import ru.romanov.modulethree.domain.Book;
 import ru.romanov.modulethree.domain.Comment;
@@ -25,62 +20,62 @@ import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
-@Import({AuthorDaoJpa.class, BookDaoJpa.class, CommentDaoJpa.class, GenreDaoJpa.class})
-public class CommentDaoJpaTest {
+//@Import({AuthorDaoJpa.class, BookDaoJpa.class, CommentDaoJpa.class, GenreDaoJpa.class})
+public class CommentRepositoryTest {
 
     @Autowired
-    private AuthorDao authorDao;
+    private AuthorRepository authorRepository;
 
     @Autowired
-    private BookDao bookDao;
+    private BookRepository bookRepository;
 
     @Autowired
-    private CommentDao commentDao;
+    private CommentRepository commentRepository;
 
     @Autowired
-    private GenreDao genreDao;
+    private GenreRepository genreRepository;
 
     @Test
     public void insertTest() {
-        Book book = bookDao.getById(1);
-        int id = commentDao.insert(new Comment("Nravitsa!", book));
-        Comment commentFromDB = commentDao.getById(id);
+        Book book = bookRepository.findById(1).get();
+        Comment comment = commentRepository.save(new Comment("Nravitsa!", book));
+        Comment commentFromDB = commentRepository.findById(comment.getId()).get();
         assertEquals(commentFromDB.getText(), "Nravitsa!");
         assertEquals(commentFromDB.getBook(), book);
     }
 
     @Test
     public void getByIdTest() {
-        Book book = bookDao.getById(1);
-        Comment comment = commentDao.getById(1);
+        Book book = bookRepository.findById(1).get();
+        Comment comment = commentRepository.findById(1).get();
         assertEquals(comment.getText(), "Super");
         assertEquals(comment.getBook(), book);
     }
 
     @Test
     public void getAllTest() {
-        List<Comment> genresListFromDB = commentDao.getAll();
+        List<Comment> genresListFromDB = commentRepository.findAll();
         assertEquals(genresListFromDB.size(), 4);
     }
 
     @Test
     public void updateTest() {
-        commentDao.update(2, "Ochen nravitsa!");
-        Comment commentFromDB = commentDao.getById(2);
+        commentRepository.update(2, "Ochen nravitsa!");
+        Comment commentFromDB = commentRepository.findById(2).get();
         assertEquals(commentFromDB.getText(), "Ochen nravitsa!");
     }
 
     @Test
     public void deleteTest() {
-        commentDao.deleteById(2);
-        List<Comment> commentsFromDB = commentDao.getAll();
+        commentRepository.deleteById(2);
+        List<Comment> commentsFromDB = commentRepository.findAll();
         assertEquals(commentsFromDB.size(), 3);
 
-        List<Author> authorsListFromDB = authorDao.getAll();
+        List<Author> authorsListFromDB = authorRepository.findAll();
         assertEquals(authorsListFromDB.size(), 3);
-        List<Book> booksFromDB = bookDao.getAll();
+        List<Book> booksFromDB = bookRepository.findAll();
         assertEquals(booksFromDB.size(), 3);
-        List<Genre> genresListFromDB = genreDao.getAll();
+        List<Genre> genresListFromDB = genreRepository.findAll();
         assertEquals(genresListFromDB.size(), 2);
     }
 }

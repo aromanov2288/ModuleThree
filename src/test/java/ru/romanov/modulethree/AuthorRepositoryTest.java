@@ -4,80 +4,76 @@ import org.junit.Test;
 import org.junit.runner.RunWith;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.orm.jpa.DataJpaTest;
-import org.springframework.context.annotation.Import;
 import org.springframework.test.context.junit4.SpringRunner;
-import ru.romanov.modulethree.dao.AuthorDao;
-import ru.romanov.modulethree.dao.AuthorDaoJpa;
-import ru.romanov.modulethree.dao.BookDao;
-import ru.romanov.modulethree.dao.BookDaoJpa;
-import ru.romanov.modulethree.dao.CommentDao;
-import ru.romanov.modulethree.dao.CommentDaoJpa;
-import ru.romanov.modulethree.dao.GenreDao;
-import ru.romanov.modulethree.dao.GenreDaoJpa;
+import ru.romanov.modulethree.dao.AuthorRepository;
+import ru.romanov.modulethree.dao.BookRepository;
+import ru.romanov.modulethree.dao.CommentRepository;
+import ru.romanov.modulethree.dao.GenreRepository;
 import ru.romanov.modulethree.domain.Author;
 import ru.romanov.modulethree.domain.Book;
 import ru.romanov.modulethree.domain.Comment;
 import ru.romanov.modulethree.domain.Genre;
 
 import java.util.List;
+import java.util.Optional;
 
 import static org.junit.Assert.assertEquals;
 
 @RunWith(SpringRunner.class)
 @DataJpaTest
-@Import({AuthorDaoJpa.class, BookDaoJpa.class, CommentDaoJpa.class, GenreDaoJpa.class})
-public class AuthorDaoJpaTest {
+//@Import({AuthorDaoJpa.class, BookDaoJpa.class, CommentDaoJpa.class, GenreDaoJpa.class})
+public class AuthorRepositoryTest {
 
     @Autowired
-    private AuthorDao authorDao;
+    private AuthorRepository authorRepository;
 
     @Autowired
-    private BookDao bookDao;
+    private BookRepository bookRepository;
 
     @Autowired
-    private CommentDao commentDao;
+    private CommentRepository commentRepository;
 
     @Autowired
-    private GenreDao genreDao;
+    private GenreRepository genreRepository;
 
 
     @Test
     public void insertTest() {
-        int id = authorDao.insert(new Author("Dontsova"));
-        Author authorFromDB = authorDao.getById(id);
+        Author author = authorRepository.save(new Author("Dontsova"));
+        Author authorFromDB = authorRepository.findById(author.getId()).get();
         assertEquals(authorFromDB.getFio(), "Dontsova");
     }
 
     @Test
     public void getByIdTest() {
-        Author authorFromDB = authorDao.getById(1);
+        Author authorFromDB = authorRepository.findById(1).get();
         assertEquals(authorFromDB.getFio(), "Pushkin");
     }
 
     @Test
     public void getAllTest() {
-        List<Author> authorsListFromDB = authorDao.getAll();
+        List<Author> authorsListFromDB = authorRepository.findAll();
         assertEquals(authorsListFromDB.size(), 3);
     }
 
     @Test
     public void updateTest() {
-        authorDao.update(2, "Dontsova");
-        Author authorFromDB = authorDao.getById(2);
+        authorRepository.update(2, "Dontsova");
+        Author authorFromDB = authorRepository.findById(2).get();
         assertEquals(authorFromDB.getFio(), "Dontsova");
     }
 
     @Test
     public void deleteTest() {
-        authorDao.deleteById(3);
-        List<Author> authorsListFromDB = authorDao.getAll();
+        authorRepository.deleteById(3);
+        List<Author> authorsListFromDB = authorRepository.findAll();
         assertEquals(authorsListFromDB.size(), 2);
 
-        List<Book> booksFromDB = bookDao.getAll();
+        List<Book> booksFromDB = bookRepository.findAll();
         assertEquals(booksFromDB.size(), 2);
-        List<Genre> genresListFromDB = genreDao.getAll();
+        List<Genre> genresListFromDB = genreRepository.findAll();
         assertEquals(genresListFromDB.size(), 2);
-        List<Comment> commentsFromDB = commentDao.getAll();
+        List<Comment> commentsFromDB = commentRepository.findAll();
         assertEquals(commentsFromDB.size(), 3);
     }
 }
