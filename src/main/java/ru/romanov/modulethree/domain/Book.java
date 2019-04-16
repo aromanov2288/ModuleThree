@@ -1,61 +1,44 @@
 package ru.romanov.modulethree.domain;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.ManyToOne;
-import javax.persistence.OneToMany;
-import javax.persistence.Table;
-import java.util.Collections;
-import java.util.HashSet;
-import java.util.List;
+import org.springframework.data.annotation.Id;
+import org.springframework.data.mongodb.core.mapping.Document;
+import org.springframework.data.mongodb.core.mapping.Field;
+
+import java.util.Objects;
 import java.util.Set;
 
-@Entity
-@Table(name = "books")
+@Document(collection = "books")
 public class Book {
 
     @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
+    private String id;
 
+    @Field(value = "name")
     private String name;
 
-    @ManyToOne
-    @JoinColumn(name = "genre_id")
-    private Genre genre;
+    @Field(value = "genre")
+    private String genre;
 
-    @ManyToMany(fetch = FetchType.EAGER)
-    @JoinTable(name = "books_authors",
-        joinColumns = @JoinColumn(name = "book_id"),
-        inverseJoinColumns = @JoinColumn(name = "author_id"))
+    @Field(value = "authors")
     private Set<Author> authorsSet;
 
-    @OneToMany(mappedBy = "book", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
+    @Field(value = "comments")
     private Set<Comment> commentsSet;
 
     public Book() {
     }
 
-    public Book(String name, Genre genre, Set<Author> authorsSet) {
+    public Book(String name, String genre, Set<Author> authorsSet) {
         this.name = name;
         this.genre = genre;
         this.authorsSet = authorsSet;
     }
 
-
-
-    public int getId() {
+    public String getId() {
         return id;
     }
 
-    public void setId(int id) {
+    public void setId(String id) {
         this.id = id;
     }
 
@@ -67,11 +50,11 @@ public class Book {
         this.name = name;
     }
 
-    public Genre getGenre() {
+    public String getGenre() {
         return genre;
     }
 
-    public void setGenre(Genre genre) {
+    public void setGenre(String genre) {
         this.genre = genre;
     }
 
@@ -93,40 +76,45 @@ public class Book {
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder("Book{");
-        builder.append("id=").append(id);
-        builder.append(", name=").append(name);
-        builder.append(", genre=").append(genre.getName());
-        if (authorsSet != null) {
-            builder.append(", authorsSet={");
-            if (!authorsSet.isEmpty()) {
-                int i = 0;
-                for(Author author : authorsSet) {
-                    i++;
-                    builder.append(author.getFio());
-                    if (i != authorsSet.size()) {
-                        builder.append(", ");
-                    }
-                }
+        String authorsSetText = "{Авторы не найдены}";
+        if (authorsSet != null && !authorsSet.isEmpty()) {
+            StringBuilder builder = new StringBuilder();
+            builder.append("{");
+            for(Author author : authorsSet) {
+                builder.append(author.toString());
             }
             builder.append("}");
+            authorsSetText = builder.toString();
         }
-        if (commentsSet != null) {
-            builder.append(", commentsList={");
-            if (!commentsSet.isEmpty()) {
-                int i = 0;
-                for(Comment comment : commentsSet) {
-                    i++;
-                    builder.append(comment.getText());
-                    if (i != commentsSet.size()) {
-                        builder.append(", ");
-                    }
-                }
-            } else {
-                builder.append("Нет комментариев");
+
+        String commentsSetText = "{Комментарии не найдены}";
+        if (commentsSet != null && !commentsSet.isEmpty()) {
+            StringBuilder builder = new StringBuilder();
+            builder.append("{");
+            for(Comment comment : commentsSet) {
+                builder.append(comment.toString());
             }
             builder.append("}");
+            commentsSetText = builder.toString();
         }
-        return builder.toString();
+        return "{id=" + id + ", name=" + name + ", genre=" + genre +
+                ", authorsSet=" + authorsSetText + ", commentsSet=" + commentsSetText + "}";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Book book = (Book) o;
+        return Objects.equals(id, book.id) &&
+                Objects.equals(name, book.name) &&
+                Objects.equals(genre, book.genre) &&
+                Objects.equals(authorsSet, book.authorsSet) &&
+                Objects.equals(commentsSet, book.commentsSet);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(id, name, genre, authorsSet, commentsSet);
     }
 }

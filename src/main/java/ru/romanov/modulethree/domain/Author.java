@@ -1,43 +1,23 @@
 package ru.romanov.modulethree.domain;
 
-import javax.persistence.CascadeType;
-import javax.persistence.Entity;
-import javax.persistence.FetchType;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.JoinTable;
-import javax.persistence.ManyToMany;
-import javax.persistence.Table;
-import java.util.Set;
+import org.springframework.data.mongodb.core.mapping.Field;
 
-@Entity
-@Table(name = "authors")
+import java.util.Objects;
+
 public class Author {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-
+    @Field(value = "fio")
     private String fio;
 
-    @ManyToMany(mappedBy = "authorsSet", fetch = FetchType.EAGER, cascade = CascadeType.REMOVE)
-    private Set<Book> booksSet;
+    @Field(value = "year")
+    private Integer year;
 
     public Author() {
     }
 
-    public Author(String fio) {
+    public Author(String fio, Integer year) {
         this.fio = fio;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
+        this.year = year;
     }
 
     public String getFio() {
@@ -48,35 +28,30 @@ public class Author {
         this.fio = fio;
     }
 
-    public Set<Book> getBooksSet() {
-        return booksSet;
+    public Integer getYear() {
+        return year;
     }
 
-    public void setBooksSet(Set<Book> booksSet) {
-        this.booksSet = booksSet;
+    public void setYear(Integer year) {
+        this.year = year;
     }
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder("Author{");
-        builder.append("id=").append(id);
-        builder.append(", fio=").append(fio);
-        if (booksSet != null) {
-            builder.append(", booksSet={");
-            if (!booksSet.isEmpty()) {
-                int i = 0;
-                for(Book book : booksSet) {
-                    i++;
-                    builder.append(book.getName());
-                    if (i != booksSet.size()) {
-                        builder.append(", ");
-                    }
-                }
-            } else {
-                builder.append("Нет книг");
-            }
-            builder.append("}");
-        }
-        return builder.toString();
+        return "{fio=" + fio + ", year=" + year + "}";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Author author = (Author) o;
+        return Objects.equals(fio, author.fio) &&
+                Objects.equals(year, author.year);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(fio, year);
     }
 }

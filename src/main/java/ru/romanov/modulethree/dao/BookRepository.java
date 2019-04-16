@@ -1,18 +1,24 @@
 package ru.romanov.modulethree.dao;
 
-import org.springframework.data.jpa.repository.JpaRepository;
+import org.springframework.data.mongodb.repository.MongoRepository;
+import org.springframework.data.mongodb.repository.Query;
+import org.springframework.data.repository.query.Param;
 import ru.romanov.modulethree.domain.Book;
 
 import java.util.List;
-import java.util.Optional;
 
-public interface BookRepository extends JpaRepository<Book, Integer> {
+public interface BookRepository extends MongoRepository<Book, String> {
 
-    Book save(Book book);
+    List<Book> findAllByGenreLike(String genre);
 
-    Optional<Book> findById(Integer Id);
+    @Query("{'authors.fio': ?#{#fio}}")
+    List<Book> findAllByAuthorFio(@Param("fio")String fio);
 
-    List<Book> findAll();
+    @Query("{'comments.commentator': ?0}")
+    List<Book> findAllByCommentCommentator(String commentator);
 
-    void deleteById(Integer id);
+    void deleteAllByGenre(String genre);
+
+    @Query(value = "{'authors.fio': ?0}", delete = true)
+    void deleteAllByAuthorFio(String fio);
 }

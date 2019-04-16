@@ -3,177 +3,93 @@ package ru.romanov.modulethree;
 import org.springframework.shell.standard.ShellComponent;
 import org.springframework.shell.standard.ShellMethod;
 import org.springframework.shell.standard.ShellOption;
-import ru.romanov.modulethree.dao.AuthorRepository;
 import ru.romanov.modulethree.dao.BookRepository;
-import ru.romanov.modulethree.dao.CommentRepository;
-import ru.romanov.modulethree.dao.GenreRepository;
-import ru.romanov.modulethree.domain.Author;
-import ru.romanov.modulethree.domain.Book;
-import ru.romanov.modulethree.domain.Comment;
-import ru.romanov.modulethree.domain.Genre;
-
-import java.util.HashSet;
-import java.util.List;
-import java.util.Set;
+import ru.romanov.modulethree.service.BookService;
 
 @ShellComponent
 public class Commands {
 
-    private AuthorRepository authorRepository;
-    private GenreRepository genreRepository;
-    private BookRepository bookRepository;
-    private CommentRepository commentRepository;
+    private BookService bookService;
 
-    public Commands(AuthorRepository authorRepository, GenreRepository genreRepository,
-                    BookRepository bookRepository, CommentRepository commentRepository) {
-        this.authorRepository = authorRepository;
-        this.genreRepository = genreRepository;
-        this.bookRepository = bookRepository;
-        this.commentRepository = commentRepository;
-    }
-
-
-    @ShellMethod(value = "Insert new author.", key = "insert_author")
-    public void insertAuthor(@ShellOption String fio) {
-        authorRepository.save(new Author(fio));
-    }
-
-    @ShellMethod(value = "Get author by id", key = "get_author_by_id")
-    public String getAuthorById(@ShellOption int id){
-        Author author = authorRepository.findById(id).get();
-        return author.toString();
+    public Commands(BookService bookService) {
+        this.bookService = bookService;
     }
 
     @ShellMethod(value = "Get all authors", key = "get_all_authors")
     public String getAllAuthors(){
-        List<Author> authorsList = authorRepository.findAll();
-        StringBuilder builder = new StringBuilder();
-        for (Author author : authorsList) {
-            builder.append(author.toString()).append("\n");
-        }
-        return builder.toString();
+        return bookService.getAllAuthors();
     }
 
-    @ShellMethod(value = "Update author.", key = "update_author")
-    public void updateAuthor(@ShellOption int id, @ShellOption String fio) {
-        authorRepository.update(id, fio);
+    @ShellMethod(value = "Update author", key = "update_author")
+    public void updateAuthor(@ShellOption String oldFio, @ShellOption String newFio) {
+        bookService.updateAuthor(oldFio, newFio);
     }
 
-    @ShellMethod(value = "Delete author", key = "delete_author_by_id")
-    public void deleteAuthorById(@ShellOption int id) {
-        authorRepository.deleteById(id);
+    @ShellMethod(value = "Delete books by author fio", key = "delete_author")
+    public void deleteAuthorByFio(@ShellOption String fio) {
+        bookService.deleteAuthorByFio(fio);
     }
 
-
-    @ShellMethod(value = "Insert new book.", key = "insert_book")
-    public void insertBook(@ShellOption String name, @ShellOption int genreId, @ShellOption(arity = 3) int[] authorIds) {
-        Set<Author> authorsSet = new HashSet<>();
-        for(int authorId : authorIds) {
-            if (authorId != 0) {
-                Author author = authorRepository.findById(authorId).get();
-                authorsSet.add(author);
-            }
-        }
-        Genre genre = genreRepository.findById(genreId).get();
-        bookRepository.save(new Book(name, genre, authorsSet));
+    @ShellMethod(value = "Insert new book", key = "insert_book")
+    public void insertBook(@ShellOption String name, @ShellOption String genre,
+                           @ShellOption(arity = 3) String[] authorFio, @ShellOption(arity = 3) String[] authorYear) {
+        bookService.insertBook(name, genre, authorFio, authorYear);
     }
 
     @ShellMethod(value = "Get book by id", key = "get_book_by_id")
-    public String getBookById(@ShellOption int id){
-        Book book = bookRepository.findById(id).get();
-        return book.toString();
+    public String getBookById(@ShellOption String id){
+        return bookService.getBookById(id);
     }
 
     @ShellMethod(value = "Get all books", key = "get_all_books")
     public String getAllBooks(){
-        List<Book> booksList = bookRepository.findAll();
-        StringBuilder builder = new StringBuilder();
-        for (Book book : booksList) {
-            builder.append(book.toString()).append("\n");
-        }
-        return builder.toString();
+        return bookService.getAllBooks();
     }
 
     @ShellMethod(value = "Update book.", key = "update_book")
-    public void updateBook(@ShellOption int id, @ShellOption String name, @ShellOption int genreId, @ShellOption(arity = 3) int[] authorIds) {
-        Set<Author> authorsSet = new HashSet<>();
-        for(int authorId : authorIds) {
-            if (authorId != 0) {
-                Author author = authorRepository.findById(authorId).get();
-                authorsSet.add(author);
-            }
-        }
-        Genre genre = genreRepository.findById(genreId).get();
-        Book book = new Book(name, genre, authorsSet);
-        book.setId(id);
-        bookRepository.save(book);
+    public void updateBook(@ShellOption String id, @ShellOption String name, @ShellOption String genre,
+                           @ShellOption(arity = 3) String[] authorFio, @ShellOption(arity = 3) String[] authorYear) {
+        bookService.updateBook(id, name, genre, authorFio, authorYear);
     }
 
-    @ShellMethod(value = "Delete book", key = "delete_book_by_id")
-    public void deleteBookById(@ShellOption int id) {
-        bookRepository.deleteById(id);
+    @ShellMethod(value = "Delete book by id", key = "delete_book_by_id")
+    public void deleteBookById(@ShellOption String id) {
+        bookService.deleteBookById(id);
     }
-
 
     @ShellMethod(value = "Insert new comment", key = "insert_comment")
-    public void insertComment(@ShellOption String text, @ShellOption int bookId) {
-        Book book = bookRepository.findById(bookId).get();
-        commentRepository.save(new Comment(text, book));
-    }
-
-    @ShellMethod(value = "Get comment by id", key = "get_comment_by_id")
-    public String getCommentById(@ShellOption int id) {
-        return commentRepository.findById(id).toString();
+    public void insertComment(@ShellOption String id, @ShellOption String text, @ShellOption String commentator) {
+        bookService.insertComment(id, text, commentator);
     }
 
     @ShellMethod(value = "Get all comments", key = "get_all_comments")
-    public String getAllComments(){
-        List<Comment> commentsList = commentRepository.findAll();
-        StringBuilder builder = new StringBuilder();
-        for (Comment comment : commentsList) {
-            builder.append(comment.toString()).append("\n");
-        }
-        return builder.toString();
+    public String getAllComments(@ShellOption String commentator){
+        return bookService.getAllComments(commentator);
     }
 
     @ShellMethod(value = "Update comment", key = "update_comment")
-    public void updateComment(@ShellOption int id, @ShellOption String text) {
-        commentRepository.update(id, text);
+    public void updateComment(@ShellOption String id, @ShellOption String oldText,
+                              @ShellOption String newText, @ShellOption String commentator) {
+        bookService.updateComment(id, oldText, newText, commentator);
     }
 
-    @ShellMethod(value = "Delete comment", key = "delete_comment_by_id")
-    public void deleteCommentById(@ShellOption int id) {
-        commentRepository.deleteById(id);
-    }
-
-
-    @ShellMethod(value = "Insert new genre", key = "insert_genre")
-    public void insertGenre(@ShellOption String name) {
-        genreRepository.save(new Genre(name));
-    }
-
-    @ShellMethod(value = "Get genre by id", key = "get_genre_by_id")
-    public String getGenreById(@ShellOption int id){
-        return genreRepository.findById(id).get().toString();
+    @ShellMethod(value = "Delete comment", key = "delete_comment")
+    public void deleteCommentById(@ShellOption String id, @ShellOption String text, @ShellOption String commentator) {
+        bookService.deleteComment(id, text, commentator);
     }
 
     @ShellMethod(value = "Get all genres", key = "get_all_genres")
-    public String getAllGenres(){
-        List<Genre> genresList = genreRepository.findAll();
-        StringBuilder builder = new StringBuilder();
-        for (Genre genre : genresList) {
-            builder.append(genre.toString()).append("\n");
-        }
-        return builder.toString();
+    public String getAllGenres() {
+        return bookService.getAllGenres();
     }
 
     @ShellMethod(value = "Update genre.", key = "update_genre")
-    public void updateGenre(@ShellOption int id, @ShellOption String name) {
-        genreRepository.update(id, name);
+    public void updateGenre(@ShellOption String oldGenre, @ShellOption String newGenre) {
+        bookService.updateGenre(oldGenre, newGenre);
     }
 
-    @ShellMethod(value = "Delete genre", key = "delete_genre_by_id")
-    public void deleteGenreById(@ShellOption int id) {
-        genreRepository.deleteById(id);
+    @ShellMethod(value = "Delete genre", key = "delete_genre")
+    public void deleteGenreById(@ShellOption String genre) {
+        bookService.deleteGenre(genre);
     }
 }

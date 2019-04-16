@@ -1,41 +1,23 @@
 package ru.romanov.modulethree.domain;
 
-import javax.persistence.Entity;
-import javax.persistence.GeneratedValue;
-import javax.persistence.GenerationType;
-import javax.persistence.Id;
-import javax.persistence.JoinColumn;
-import javax.persistence.ManyToOne;
-import javax.persistence.Table;
+import org.springframework.data.mongodb.core.mapping.Field;
 
-@Entity
-@Table(name = "comments")
+import java.util.Objects;
+
 public class Comment {
 
-    @Id
-    @GeneratedValue(strategy = GenerationType.IDENTITY)
-    private int id;
-
+    @Field(value = "text")
     private String text;
 
-    @ManyToOne
-    @JoinColumn(name = "book_id")
-    private Book book;
+    @Field(value = "commentator")
+    private String commentator;
 
     public Comment() {
     }
 
-    public Comment(String text, Book book) {
+    public Comment(String text, String commentator) {
         this.text = text;
-        this.book = book;
-    }
-
-    public int getId() {
-        return id;
-    }
-
-    public void setId(int id) {
-        this.id = id;
+        this.commentator = commentator;
     }
 
     public String getText() {
@@ -46,21 +28,30 @@ public class Comment {
         this.text = text;
     }
 
-    public Book getBook() {
-        return book;
+    public String getCommentator() {
+        return commentator;
     }
 
-    public void setBook(Book book) {
-        this.book = book;
+    public void setCommentator(String commentator) {
+        this.commentator = commentator;
     }
 
     @Override
     public String toString() {
-        StringBuilder builder = new StringBuilder("Comment{");
-        builder.append("id=").append(id);
-        builder.append(", text=").append(text);
-        builder.append(", book=").append(book.getName());
-        builder.append("}");
-        return builder.toString();
+        return "{text=" + text + ", commentator=" + commentator + "}";
+    }
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null || getClass() != o.getClass()) return false;
+        Comment comment = (Comment) o;
+        return Objects.equals(text, comment.text) &&
+                Objects.equals(commentator, comment.commentator);
+    }
+
+    @Override
+    public int hashCode() {
+        return Objects.hash(text, commentator);
     }
 }
